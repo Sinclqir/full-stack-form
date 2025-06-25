@@ -143,7 +143,6 @@ const UsersList = ({ currentUser, token }) => {
                   <div className="user-header-info">
                     <Users className="user-avatar-icon" />
                     <span className="user-email">{user.email}</span>
-                    <span className={`role-badge ${user.role}`}>{user.role === "admin" ? "Admin" : "Utilisateur"}</span>
                   </div>
                 </div>
               </div>

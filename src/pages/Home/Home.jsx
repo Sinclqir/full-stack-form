@@ -1,20 +1,17 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { Leaf, User, LogOut } from 'lucide-react';
+import LoginForm from './components/LoginForm';
 import RegistrationForm from './components/RegistrationForm';
 import UsersList from './components/UsersList';
-import { API_ENDPOINTS } from '../../config/api';
 import './Home.css';
 
 const Home = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(null);
   const [showRegistration, setShowRegistration] = useState(false);
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
-  });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
@@ -26,46 +23,17 @@ const Home = () => {
         setCurrentUser(parsedUser);
       } catch (error) {
         console.error('Erreur lors du parsing des données utilisateur:', error);
-
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
     }
   }, []);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleLoginSuccess = (accessToken, user) => {
+    setToken(accessToken);
+    setCurrentUser(user);
     setError('');
-
-    try {
-      console.log('Tentative de connexion avec:', loginData.email);
-      const response = await axios.post(API_ENDPOINTS.LOGIN, {
-        email: loginData.email,
-        password: loginData.password
-      });
-
-      console.log('Réponse de l\'API:', response.data);
-      const { access_token, user } = response.data;
-      
-      console.log('Token extrait:', access_token);
-      console.log('User extrait:', user);
-      
-      localStorage.setItem('token', access_token);
-      localStorage.setItem('user', JSON.stringify(user));
-      
-      setToken(access_token);
-      setCurrentUser(user);
-      setLoginData({ email: '', password: '' });
-      
-      console.log('Utilisateur connecté:', user);
-      
-    } catch (err) {
-      console.error('Erreur de connexion:', err.response?.data || err.message);
-      setError(err.response?.data?.detail || 'Erreur de connexion');
-    } finally {
-      setLoading(false);
-    }
+    setSuccess('');
   };
 
   const handleLogout = () => {
@@ -74,111 +42,110 @@ const Home = () => {
     setToken(null);
     setCurrentUser(null);
     setError('');
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setLoginData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setSuccess('');
   };
 
   const handleRegistrationSuccess = () => {
     setShowRegistration(false);
     setError('');
+    setSuccess('Inscription réussie ! Vous pouvez maintenant vous connecter.');
+    setTimeout(() => setSuccess(''), 3000);
   };
 
   const switchToLogin = () => {
     setShowRegistration(false);
     setError('');
+    setSuccess('');
   };
 
   const switchToRegistration = () => {
     setShowRegistration(true);
     setError('');
+    setSuccess('');
   };
 
   return (
     <div className="home">
       <header className="header">
-        <h1>Gestion des Utilisateurs</h1>
-        {currentUser && (
-          <div className="user-info">
-            <span>Connecté en tant que : {currentUser.email}</span>
-            <button onClick={handleLogout} className="logout-btn">
-              Se déconnecter
-            </button>
+        <div className="header-content">
+          <div className="logo">
+            <h1>
+              Green<span className="green-text">City</span>
+            </h1>
+            <Leaf className="logo-icon" />
           </div>
-        )}
+
+          {currentUser && (
+            <div className="user-info">
+              <div className="user-details">
+                <User className="user-icon" />
+                <span className="user-email">{currentUser.email}</span>
+                <span className={`role-badge ${currentUser.role}`}>
+                  {currentUser.role === 'admin' ? 'Admin' : 'Utilisateur'}
+                </span>
+              </div>
+              <button onClick={handleLogout} className="logout-btn">
+                <LogOut className="logout-icon" />
+                Déconnexion
+              </button>
+            </div>
+          )}
+        </div>
       </header>
 
       <main className="main-content">
         {!currentUser ? (
           <div className="auth-container">
-            <div className="auth-forms">
-              {!showRegistration ? (
-                // Formulaire de connexion
-                <div className="login-form">
-                  <h2>Connexion</h2>
-                  
-                  {error && <div className="error-message">{error}</div>}
+            <div className="auth-card">
+              <div className="auth-header">
+                <h2 className="auth-title">{showRegistration ? 'Inscription' : 'Connexion'}</h2>
+                <p className="auth-description">
+                  {showRegistration ? 'Créez votre compte pour commencer' : 'Connectez-vous à votre compte'}
+                </p>
+              </div>
 
-                  <form onSubmit={handleLogin}>
-                    <div className="form-group">
-                      <label htmlFor="login-email">Email</label>
-                      <input
-                        type="email"
-                        id="login-email"
-                        name="email"
-                        value={loginData.email}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
+              <div className="auth-content">
+                {error && <div className="alert error">{error}</div>}
+                {success && <div className="alert success">{success}</div>}
 
-                    <div className="form-group">
-                      <label htmlFor="login-password">Mot de passe</label>
-                      <input
-                        type="password"
-                        id="login-password"
-                        name="password"
-                        value={loginData.password}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
+                {!showRegistration ? (
+                  <LoginForm onLoginSuccess={handleLoginSuccess} />
+                ) : (
+                  <RegistrationForm 
+                    onRegistrationSuccess={handleRegistrationSuccess} 
+                    onSwitchToLogin={switchToLogin} 
+                  />
+                )}
+              </div>
 
-                    <button type="submit" disabled={loading} className="submit-btn">
-                      {loading ? 'Connexion...' : 'Se connecter'}
-                    </button>
-                  </form>
-
-                  <div className="form-divider">
-                    <span>OU</span>
-                  </div>
-
-                  <div className="form-switch">
-                    <p>
+              <div className="auth-footer">
+                <hr className="separator" />
+                <p className="switch-text">
+                  {!showRegistration ? (
+                    <>
                       Pas encore de compte ?{' '}
-                      <button type="button" onClick={switchToRegistration} className="link-btn">
+                      <button type="button" onClick={switchToRegistration} className="switch-btn">
                         S'inscrire
                       </button>
-                    </p>
-                  </div>
+                    </>
+                  ) : (
+                    <>
+                      Déjà inscrit ?{' '}
+                      <button type="button" onClick={switchToLogin} className="switch-btn">
+                        Se connecter
+                      </button>
+                    </>
+                  )}
+                </p>
 
-                  <div className="admin-info">
-                    <h3>Connexion Admin</h3>
-                    <p>Email: loise.fenoll@ynov.com</p>
-                    <p>Mot de passe: PvdrTAzTeR247sDnAZBr</p>
+                {!showRegistration && (
+                  <div className="admin-demo-card">
+                    <h4 className="admin-demo-title">Compte de test Admin</h4>
+                    <p className="admin-demo-text">Email: loise.fenoll@ynov.com</p>
+                    <p className="admin-demo-text">Mot de passe: PvdrTAzTeR247sDnAZBr</p>
                   </div>
-                </div>
-              ) : (
-                <RegistrationForm
-                  onRegistrationSuccess={handleRegistrationSuccess}
-                  onSwitchToLogin={switchToLogin}
-                />
-              )}
+                )}
+              </div>
             </div>
           </div>
         ) : (

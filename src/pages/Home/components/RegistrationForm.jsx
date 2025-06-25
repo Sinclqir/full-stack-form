@@ -12,7 +12,6 @@ const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
     birth_date: '',
     city: '',
     postal_code: '',
-    role: 'user'
   });
 
   const [loading, setLoading] = useState(false);
@@ -42,7 +41,7 @@ const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
         birth_date: formData.birth_date,
         city: formData.city,
         postal_code: formData.postal_code,
-        role: formData.role
+        role: 'user'
       });
 
       setSuccess('Inscription réussie ! Vous pouvez maintenant vous connecter.');
@@ -54,7 +53,6 @@ const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
         birth_date: '',
         city: '',
         postal_code: '',
-        role: 'user'
       });
 
       if (onRegistrationSuccess) {
@@ -69,30 +67,36 @@ const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
 
   return (
     <div className="registration-form">
-      <h2>Inscription</h2>
-      
-      {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
+      {error && <div className="alert error">{error}</div>}
+      {success && <div className="alert success">{success}</div>}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="registration-content">
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="last_name">Nom *</label>
+            <label htmlFor="last_name" className="form-label">
+              Nom *
+            </label>
             <input
               type="text"
               id="last_name"
               name="last_name"
+              className="form-input"
+              placeholder="Nom"
               value={formData.last_name}
               onChange={handleInputChange}
               required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="first_name">Prénom *</label>
+            <label htmlFor="first_name" className="form-label">
+              Prénom *
+            </label>
             <input
               type="text"
               id="first_name"
               name="first_name"
+              className="form-input"
+              placeholder="Prénom"
               value={formData.first_name}
               onChange={handleInputChange}
               required
@@ -101,11 +105,15 @@ const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="email">Email *</label>
+          <label htmlFor="email" className="form-label">
+            Email *
+          </label>
           <input
             type="email"
             id="email"
             name="email"
+            className="form-input"
+            placeholder="votre@email.com"
             value={formData.email}
             onChange={handleInputChange}
             required
@@ -113,11 +121,15 @@ const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="password">Mot de passe *</label>
+          <label htmlFor="password" className="form-label">
+            Mot de passe *
+          </label>
           <input
             type="password"
             id="password"
             name="password"
+            className="form-input"
+            placeholder="••••••••"
             value={formData.password}
             onChange={handleInputChange}
             required
@@ -126,11 +138,14 @@ const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="birth_date">Date de naissance *</label>
+          <label htmlFor="birth_date" className="form-label">
+            Date de naissance *
+          </label>
           <input
             type="date"
             id="birth_date"
             name="birth_date"
+            className="form-input"
             value={formData.birth_date}
             onChange={handleInputChange}
             required
@@ -139,22 +154,30 @@ const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="city">Ville *</label>
+            <label htmlFor="city" className="form-label">
+              Ville *
+            </label>
             <input
               type="text"
               id="city"
               name="city"
+              className="form-input"
+              placeholder="Ville"
               value={formData.city}
               onChange={handleInputChange}
               required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="postal_code">Code postal *</label>
+            <label htmlFor="postal_code" className="form-label">
+              Code postal *
+            </label>
             <input
               type="text"
               id="postal_code"
               name="postal_code"
+              className="form-input"
+              placeholder="75001"
               value={formData.postal_code}
               onChange={handleInputChange}
               required
@@ -162,19 +185,6 @@ const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
               title="Code postal à 5 chiffres"
             />
           </div>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="role">Rôle</label>
-          <select
-            id="role"
-            name="role"
-            value={formData.role}
-            onChange={handleInputChange}
-          >
-            <option value="user">Utilisateur</option>
-            <option value="admin">Administrateur</option>
-          </select>
         </div>
 
         <button type="submit" disabled={loading} className="submit-btn">

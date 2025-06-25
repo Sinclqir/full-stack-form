@@ -35,7 +35,8 @@ app.add_middleware(
         "http://localhost:5173",
         "http://localhost:4173",
         "https://enzocasalini.github.io",
-        "https://integ-deploiement.vercel.app"
+        "https://integ-deploiement.vercel.app",
+        "https://sinclqir.github.io"
     ],
     allow_credentials=True,
     allow_methods=["*"],

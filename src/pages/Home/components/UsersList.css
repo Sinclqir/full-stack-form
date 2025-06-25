@@ -45,23 +45,25 @@
 .user-header-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 12px;
+  flex-wrap: nowrap;
 }
 
 .user-avatar-icon {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 20px;
+  height: 20px;
   color: #6b7280;
   flex-shrink: 0;
 }
 
 .user-email {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: #1f2937;
-  flex: 1;
-  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 
 .user-name {
@@ -99,4 +101,22 @@
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+.role-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: white;
+  background-color: #6b7280;
+  white-space: nowrap;
+}
+
+.role-badge.admin {
+  background-color: #dc2626;
+}
+
+.role-badge.user {
+  background-color: #2563eb;
 }

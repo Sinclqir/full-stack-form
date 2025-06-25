@@ -35,12 +35,26 @@ app.add_middleware(
         "http://localhost:5173",
         "http://localhost:4173",
         "https://sinclqir.github.io",
+        "https://*.github.io",  # Tous les sous-domaines GitHub Pages
         "https://full-stack-form-server.vercel.app",
-
+        "https://*.vercel.app",  # Tous les sous-domaines Vercel
+        "*"  # Temporaire pour debug - à retirer en production
     ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+    allow_headers=[
+        "Accept",
+        "Accept-Language",
+        "Content-Language",
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
+    ],
+    expose_headers=["*"],
+    max_age=86400,  # Cache preflight pour 24h
 )
 
 # Événement de démarrage
@@ -266,6 +280,30 @@ async def health_check():
             raise HTTPException(status_code=503, detail="Database connection failed")
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Health check failed: {str(e)}")
+
+# Route de test CORS
+@app.get("/cors-test")
+async def cors_test():
+    """Route de test pour vérifier la configuration CORS"""
+    return {
+        "message": "CORS test successful",
+        "timestamp": datetime.utcnow().isoformat(),
+        "allowed_origins": [
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://localhost:4173",
+            "https://sinclqir.github.io",
+            "https://*.github.io",
+            "https://full-stack-form-server.vercel.app",
+            "https://*.vercel.app"
+        ]
+    }
+
+# Route OPTIONS pour gérer les requêtes preflight
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    """Gère les requêtes OPTIONS pour CORS"""
+    return {"message": "OK"}
 
 if __name__ == "__main__":
     import uvicorn

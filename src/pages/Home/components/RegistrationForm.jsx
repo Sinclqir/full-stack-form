@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../../config/api';
 import './RegistrationForm.css';
 
 const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
@@ -33,7 +34,7 @@ const RegistrationForm = ({ onRegistrationSuccess, onSwitchToLogin }) => {
     setSuccess('');
 
     try {
-      const response = await axios.post('http://localhost:8000/register', {
+      const response = await axios.post(API_ENDPOINTS.REGISTER, {
         last_name: formData.last_name,
         first_name: formData.first_name,
         email: formData.email,

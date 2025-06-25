@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import RegistrationForm from './components/RegistrationForm';
 import UsersList from './components/UsersList';
+import { API_ENDPOINTS } from '../../config/api';
 import './Home.css';
 
 const Home = () => {
@@ -41,7 +42,7 @@ const Home = () => {
 
     try {
       console.log('Tentative de connexion avec:', loginData.email);
-      const response = await axios.post('http://localhost:8000/login', {
+      const response = await axios.post(API_ENDPOINTS.LOGIN, {
         email: loginData.email,
         password: loginData.password
       });

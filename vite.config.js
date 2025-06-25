@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// Le nom du repo GitHub ici :
+const repoName = 'full-stack-form';
+
 export default defineConfig({
-  base: process.env.VITE_BASE_PATH || '/',
+  base: `/${repoName}/`,
   plugins: [react()],
   server: {
     host: '0.0.0.0',

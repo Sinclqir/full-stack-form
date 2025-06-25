@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../../config/api';
 import './UsersList.css';
 
 const UsersList = ({ currentUser, token }) => {
@@ -27,7 +28,7 @@ const UsersList = ({ currentUser, token }) => {
       if (isAdmin) {
         // Admin : récupère tous les utilisateurs
         console.log('Récupération en tant qu\'admin...');
-        const response = await axios.get('http://localhost:8000/users', {
+        const response = await axios.get(API_ENDPOINTS.USERS, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -37,7 +38,7 @@ const UsersList = ({ currentUser, token }) => {
       } else {
         // Utilisateur normal : récupère la liste publique
         console.log('Récupération en tant qu\'utilisateur...');
-        const response = await axios.get('http://localhost:8000/public-users');
+        const response = await axios.get(API_ENDPOINTS.PUBLIC_USERS);
         console.log('Réponse utilisateurs (public):', response.data);
         setUsers(response.data);
       }
@@ -58,7 +59,7 @@ const UsersList = ({ currentUser, token }) => {
 
     try {
       setDeletingUser(userId);
-      await axios.delete(`http://localhost:8000/users/${userId}`, {
+      await axios.delete(`${API_ENDPOINTS.USERS}/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -15,8 +15,6 @@ const Home = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  // Vérifier si l'utilisateur est déjà connecté au chargement
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
@@ -28,7 +26,7 @@ const Home = () => {
         setCurrentUser(parsedUser);
       } catch (error) {
         console.error('Erreur lors du parsing des données utilisateur:', error);
-        // Nettoyer les données corrompues
+
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
@@ -53,7 +51,6 @@ const Home = () => {
       console.log('Token extrait:', access_token);
       console.log('User extrait:', user);
       
-      // Sauvegarder en localStorage
       localStorage.setItem('token', access_token);
       localStorage.setItem('user', JSON.stringify(user));
       
@@ -104,7 +101,6 @@ const Home = () => {
 
   return (
     <div className="home">
-      {/* Header avec informations utilisateur */}
       <header className="header">
         <h1>Gestion des Utilisateurs</h1>
         {currentUser && (
@@ -119,7 +115,6 @@ const Home = () => {
 
       <main className="main-content">
         {!currentUser ? (
-          // Affichage des formulaires de connexion/inscription
           <div className="auth-container">
             <div className="auth-forms">
               {!showRegistration ? (
@@ -172,7 +167,6 @@ const Home = () => {
                     </p>
                   </div>
 
-                  {/* Informations de connexion admin */}
                   <div className="admin-info">
                     <h3>Connexion Admin</h3>
                     <p>Email: loise.fenoll@ynov.com</p>
@@ -180,7 +174,6 @@ const Home = () => {
                   </div>
                 </div>
               ) : (
-                // Formulaire d'inscription
                 <RegistrationForm
                   onRegistrationSuccess={handleRegistrationSuccess}
                   onSwitchToLogin={switchToLogin}
@@ -189,7 +182,6 @@ const Home = () => {
             </div>
           </div>
         ) : (
-          // Affichage de la liste des utilisateurs
           <UsersList currentUser={currentUser} token={token} />
         )}
       </main>

@@ -36,7 +36,6 @@ const UsersList = ({ currentUser, token }) => {
         console.log('Réponse utilisateurs (admin):', response.data);
         setUsers(response.data);
       } else {
-        // Utilisateur normal : récupère la liste publique
         console.log('Récupération en tant qu\'utilisateur...');
         const response = await axios.get(API_ENDPOINTS.PUBLIC_USERS);
         console.log('Réponse utilisateurs (public):', response.data);
@@ -65,7 +64,6 @@ const UsersList = ({ currentUser, token }) => {
         }
       });
 
-      // Mettre à jour la liste
       setUsers(users.filter(user => user.id !== userId));
     } catch (err) {
       alert(err.response?.data?.detail || 'Erreur lors de la suppression');
@@ -113,7 +111,6 @@ const UsersList = ({ currentUser, token }) => {
           {users.map((user) => (
             <div key={user.id} className="user-card">
               {isAdmin ? (
-                // Vue admin : toutes les informations
                 <>
                   <div className="user-header">
                     <h3>{user.first_name} {user.last_name}</h3>
@@ -141,7 +138,6 @@ const UsersList = ({ currentUser, token }) => {
                   )}
                 </>
               ) : (
-                // Vue utilisateur : informations limitées
                 <>
                   <div className="user-header">
                     <h3>{user.first_name} {user.last_name}</h3>

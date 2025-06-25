@@ -203,15 +203,6 @@ const UsersList = ({ currentUser, token }) => {
           ))}
         </div>
       )}
-
-      <div className="users-info-card">
-        <p className="users-info-text">
-          {isAdmin 
-            ? `Affichage de ${users.length} utilisateur(s) (vue administrateur)`
-            : `Affichage de ${users.length} utilisateur(s) (vue publique)`
-          }
-        </p>
-      </div>
     </div>
   );
 };

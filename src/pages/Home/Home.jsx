@@ -68,13 +68,6 @@ const Home = () => {
     <div className="home">
       <header className="header">
         <div className="header-content">
-          <div className="logo">
-            <h1>
-              Green<span className="green-text">City</span>
-            </h1>
-            <Leaf className="logo-icon" />
-          </div>
-
           {currentUser && (
             <div className="user-info">
               <div className="user-details">

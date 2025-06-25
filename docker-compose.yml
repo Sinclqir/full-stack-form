@@ -1,0 +1,92 @@
+version: '3.8'
+
+x-common-variables: &common-variables
+  MYSQL_HOST: ${MYSQL_HOST}
+  MYSQL_DATABASE: ${MYSQL_DATABASE}
+  MYSQL_USER: ${MYSQL_USER}
+  MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+x-fastapi-variables: &fastapi-variables
+  <<: *common-variables
+  PORT: ${PORT}
+  ADMIN_EMAIL: ${ADMIN_EMAIL}
+  ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      <<: *common-variables
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sqlfiles:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    depends_on:
+      - mysql
+
+  server:
+    build: ./server
+    container_name: fastapi_backend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      <<: *fastapi-variables
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      ENVIRONMENT: production
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+    volumes:
+      - ./server:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  client:
+    build:
+      context: .
+      dockerfile: DockerfileReact
+    container_name: react_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_REACT_APP_API_URL=http://localhost:8000
+      - VITE_BASE_PATH=/
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      server
+    networks:
+      - app-network
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - /app/node_modules
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge

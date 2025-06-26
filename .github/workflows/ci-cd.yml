@@ -134,23 +134,6 @@ jobs:
           docker network ls
           docker network inspect full-stack-form_app-network || echo "Network not found"
 
-      - name: Check and initialize database
-        run: |
-          echo "Checking database status..."
-          docker compose logs mysql
-          
-          echo "Waiting for MySQL to be fully ready..."
-          sleep 10
-          
-          echo "Checking if admin user exists..."
-          docker exec mysql_db mysql -u root -pFullstackform1985 -e "USE fullstackform_db; SELECT email FROM users WHERE email='loise.fenoll@ynov.com';" || echo "Admin user not found or database error"
-          
-          echo "Backend logs:"
-          docker compose logs server --tail=50
-          
-          echo "Testing admin creation endpoint:"
-          curl -X POST http://localhost:8000/init-admin -H "Content-Type: application/json" || echo "Init admin endpoint not available"
-
       - name: Install dependencies (again for Cypress)
         run: npm ci
 

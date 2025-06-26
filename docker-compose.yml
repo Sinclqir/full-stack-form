@@ -4,8 +4,8 @@ x-common-variables: &common-variables
   MYSQL_HOST: ${MYSQL_HOST:-localhost}
   MYSQL_DATABASE: ${MYSQL_DATABASE:-fullstackform_db}
   MYSQL_USER: ${MYSQL_USER:-root}
-  MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Fullstackform1985&}
-  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Fullstackform1985&}
+  MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Fullstackform1985}
+  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Fullstackform1985}
 
 x-fastapi-variables: &fastapi-variables
   <<: *common-variables
@@ -21,8 +21,8 @@ services:
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-fullstackform_db}
       MYSQL_USER: ${MYSQL_USER:-root}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Fullstackform1985&}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Fullstackform1985&}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Fullstackform1985}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Fullstackform1985}
     ports:
       - "3306:3306"
     volumes:
@@ -31,7 +31,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-Fullstackform1985&}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pFullstackform1985"]
       interval: 30s
       timeout: 10s
       retries: 5

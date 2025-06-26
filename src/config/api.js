@@ -1,19 +1,25 @@
-// Configuration de l'API
-// Supporte les deux noms de variables d'environnement pour la compatibilité
-const rawApiUrl = import.meta.env.VITE_API_URL || 
-                  import.meta.env.VITE_REACT_APP_API_URL || 
-                  'http://localhost:8000';
+// src/config/api.js
+function getApiUrl() {
+  // Vite injecte import.meta.env, sinon fallback sur process.env (pour Jest)
+  try {
+    // Utilise une fonction dynamique pour éviter que Jest/Babel parse 'import.meta'
+    // eslint-disable-next-line no-new-func
+    const viteEnv = new Function('return typeof import !== "undefined" && import.meta && import.meta.env && import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : undefined;')();
+    if (viteEnv) return viteEnv;
+  } catch (e) {
+    // ignore, fallback below
+  }
+  if (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) {
+    return process.env.VITE_API_URL;
+  }
+  return 'http://localhost:8000';
+}
 
-// Supprime le slash final s'il y en a un (pour éviter les // dans les URLs)
-const API_BASE_URL = rawApiUrl.endsWith('/') ? rawApiUrl.slice(0, -1) : rawApiUrl;
+export const API_URL = getApiUrl();
 
 export const API_ENDPOINTS = {
-  LOGIN: `${API_BASE_URL}/login`,
-  REGISTER: `${API_BASE_URL}/register`,
-  USERS: `${API_BASE_URL}/users`,
-  PUBLIC_USERS: `${API_BASE_URL}/public-users`,
-  USER_ME: `${API_BASE_URL}/users/me`,
-  HEALTH: `${API_BASE_URL}/health`
+  REGISTER: `${API_URL}/api/register`,
+  LOGIN: `${API_URL}/api/login`,
+  USERS: `${API_URL}/api/users`,
+  PUBLIC_USERS: `${API_URL}/api/public-users`,
 };
-
-export default API_BASE_URL;

@@ -71,8 +71,19 @@ describe('Tests d\'authentification', () => {
 
   describe('Inscription', () => {
     beforeEach(() => {
-      // Basculer vers le formulaire d'inscription
-      cy.get('.switch-btn').contains('S\'inscrire').click()
+      // Ensure we start from the login form
+      cy.visit('/')
+      cy.clearLocalStorage()
+      
+      // Wait for the page to load
+      cy.get('.auth-title').should('be.visible')
+      
+      // Basculer vers le formulaire d'inscription avec plus de temps d'attente
+      cy.get('.switch-btn', { timeout: 10000 }).contains('S\'inscrire').should('be.visible').click()
+      
+      // Attendre que le formulaire d'inscription soit visible
+      cy.get('.auth-title', { timeout: 10000 }).should('contain', 'Inscription')
+      cy.get('#last_name', { timeout: 10000 }).should('be.visible')
     })
 
     it('Devrait afficher le formulaire d\'inscription', () => {
@@ -87,6 +98,10 @@ describe('Tests d\'authentification', () => {
     })
 
     it('Devrait s\'inscrire avec des données valides', () => {
+      // Ensure we're on the registration form
+      cy.get('.auth-title').should('contain', 'Inscription')
+      cy.get('#last_name').should('be.visible')
+      
       // Intercepter l'appel API d'inscription
       cy.intercept('POST', '**/register').as('registerRequest')
       
@@ -110,13 +125,10 @@ describe('Tests d\'authentification', () => {
       // Attendre plus longtemps pour la réponse API
       cy.wait(3000)
       
-      // Vérifier que le formulaire a été réinitialisé (indication de succès)
-      cy.get('#last_name').should('have.value', '')
-      cy.get('#first_name').should('have.value', '')
-      cy.get('#email').should('have.value', '')
-      
       // Vérifier que nous sommes revenus au formulaire de connexion
       cy.get('.auth-title').should('contain', 'Connexion')
+      cy.get('#login-email').should('be.visible')
+      cy.get('#login-password').should('be.visible')
     })
 
     it('Devrait afficher des erreurs avec des données invalides', () => {

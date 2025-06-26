@@ -46,4 +46,31 @@ describe('Debug - Voir le contenu de la page', () => {
       })
     })
   })
+})
+
+describe('Debug Test', () => {
+  beforeEach(() => {
+    cy.visit('/')
+    cy.clearLocalStorage()
+  })
+
+  it('Should switch to registration form', () => {
+    // Wait for page to load
+    cy.get('.auth-title').should('contain', 'Connexion')
+    
+    // Click the switch button
+    cy.get('.switch-btn').contains('S\'inscrire').click()
+    
+    // Wait for registration form
+    cy.get('.auth-title').should('contain', 'Inscription')
+    
+    // Check if registration form elements are visible
+    cy.get('#last_name').should('be.visible')
+    cy.get('#first_name').should('be.visible')
+    cy.get('#email').should('be.visible')
+    cy.get('#password').should('be.visible')
+    cy.get('#birth_date').should('be.visible')
+    cy.get('#city').should('be.visible')
+    cy.get('#postal_code').should('be.visible')
+  })
 }) 

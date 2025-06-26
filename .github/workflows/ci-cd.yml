@@ -50,10 +50,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Restore .env file from secrets
-        run: echo "$ENV_FILE" > .env
-        env:
-          ENV_FILE: ${{ secrets.ENV_FILE }}
+      - name: Create .env file for Docker tests
+        run: |
+          cat > .env << EOF
+          MYSQL_HOST=localhost
+          MYSQL_DATABASE=fullstackform_db
+          MYSQL_USER=root
+          MYSQL_PASSWORD=Fullstackform1985&
+          MYSQL_ROOT_PASSWORD=Fullstackform1985&
+          PORT=8000
+          ADMIN_EMAIL=loise.fenoll@ynov.com
+          ADMIN_PASSWORD=PvdrTAzTeR247sDnAZBr
+          JWT_SECRET_KEY=955aeaac8e7935ebc675c00de118253b84a6143aade62476d40424f25c17d20390e973aeb36aa69472f4e60b497b2e59
+          VITE_API_URL=http://localhost:8000
+          EOF
 
       - name: Build and start Docker containers
         run: docker compose up -d --build

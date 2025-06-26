@@ -62,7 +62,7 @@ jobs:
           ADMIN_EMAIL=loise.fenoll@ynov.com
           ADMIN_PASSWORD=PvdrTAzTeR247sDnAZBr
           JWT_SECRET_KEY=955aeaac8e7935ebc675c00de118253b84a6143aade62476d40424f25c17d20390e973aeb36aa69472f4e60b497b2e59
-          VITE_API_URL=http://localhost:8000
+          VITE_API_URL=http://server:8000
           EOF
 
       - name: Build and start Docker containers
@@ -109,6 +109,19 @@ jobs:
           docker compose ps
           echo "Frontend container logs:"
           docker compose logs client
+          echo "Backend container logs:"
+          docker compose logs server
+
+      - name: Test API connectivity
+        run: |
+          echo "Testing API connectivity from host:"
+          curl -v http://localhost:8000 || echo "Backend not accessible from host"
+          
+          echo "Testing API connectivity from frontend container:"
+          docker exec react_frontend curl -v http://server:8000 || echo "Backend not accessible from frontend container"
+          
+          echo "Testing frontend connectivity:"
+          curl -v http://localhost:3000 || echo "Frontend not accessible"
 
       - name: Install dependencies (again for Cypress)
         run: npm ci

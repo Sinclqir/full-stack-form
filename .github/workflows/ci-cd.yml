@@ -67,8 +67,14 @@ jobs:
 
       - name: Build and start Docker containers
         run: |
-          # Start all containers except the frontend
-          docker compose up -d mysql server
+          # Start MySQL first and wait for it to be ready
+          docker compose up -d mysql
+          echo "Waiting for MySQL to be ready..."
+          timeout 120 bash -c 'until docker exec mysql_db mysql -u root -pFullstackform1985 -e "SELECT 1;" > /dev/null 2>&1; do sleep 5; echo "MySQL not ready yet..."; done'
+          echo "MySQL is ready!"
+          
+          # Start the backend after MySQL is ready
+          docker compose up -d server
           
           # Start the frontend with the correct API URL for host access
           VITE_API_URL=http://localhost:8000 docker compose up -d client
@@ -108,13 +114,69 @@ jobs:
           echo "Listing all users:"
           docker exec mysql_db mysql -u root -pFullstackform1985 -e "USE fullstackform_db; SELECT id, email, role, created_at FROM users;" || echo "Users listing failed"
 
+      - name: Verify database connectivity before restart
+        run: |
+          echo "=== VERIFYING DATABASE CONNECTIVITY ==="
+          echo "Testing MySQL connection from host:"
+          docker exec mysql_db mysql -u root -pFullstackform1985 -e "SELECT 1;" || echo "MySQL connection failed"
+          
+          echo "Testing MySQL connection from backend container:"
+          docker exec fastapi_backend python -c "import mysql.connector; print('MySQL connector available')" || echo "MySQL connector not available in backend"
+
+      - name: Ensure MySQL is fully ready
+        run: |
+          echo "=== ENSURING MYSQL IS FULLY READY ==="
+          echo "Waiting for MySQL to be completely ready..."
+          timeout 60 bash -c '
+            while ! docker exec mysql_db mysql -u root -pFullstackform1985 -e "SELECT 1;" > /dev/null 2>&1; do
+              echo "MySQL not ready yet... ($(date))"
+              sleep 5
+            done
+          '
+          echo "MySQL is fully ready!"
+          
+          echo "Testing database schema:"
+          docker exec mysql_db mysql -u root -pFullstackform1985 -e "USE fullstackform_db; SHOW TABLES;" || echo "Database schema not ready"
+
       - name: Restart backend to ensure proper initialization
         run: |
           echo "=== RESTARTING BACKEND ==="
-          docker compose restart server
+          echo "Stopping backend container..."
+          docker compose stop server
+          
+          echo "Starting backend container..."
+          docker compose up -d server
+          
           echo "Waiting for backend to be ready after restart..."
-          timeout 60 bash -c 'until curl -f http://localhost:8000/health > /dev/null 2>&1; do sleep 5; echo "Backend not ready after restart..."; done'
+          echo "Checking logs during startup..."
+          timeout 120 bash -c '
+            while ! curl -f http://localhost:8000/health > /dev/null 2>&1; do
+              echo "Backend not ready yet... ($(date))"
+              echo "Recent logs:"
+              docker compose logs --tail=10 server
+              sleep 10
+            done
+          '
           echo "Backend is ready after restart!"
+
+      - name: Debug backend restart issues
+        run: |
+          echo "=== DEBUGGING BACKEND RESTART ==="
+          echo "Container status after restart:"
+          docker compose ps
+          
+          echo "Backend container logs after restart:"
+          docker compose logs --tail=50 server
+          
+          echo "Testing if backend is responding:"
+          curl -v http://localhost:8000/health || echo "Health endpoint not responding"
+          curl -v http://localhost:8000/ || echo "Root endpoint not responding"
+          
+          echo "Checking if port 8000 is listening:"
+          netstat -tlnp | grep :8000 || echo "Port 8000 not listening"
+          
+          echo "Checking backend container processes:"
+          docker exec fastapi_backend ps aux || echo "Cannot check processes"
 
       - name: Wait for frontend
         run: |

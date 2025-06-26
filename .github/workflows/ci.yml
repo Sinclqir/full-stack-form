@@ -85,18 +85,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Start Docker services
+      - name: Create .env file
         run: |
-          echo "MYSQL_HOST=mysql-fullstackform.alwaysdata.net" >> .env
-          echo "MYSQL_DATABASE=fullstackform_db" >> .env
-          echo "MYSQL_USER=419975" >> .env
-          echo "MYSQL_PASSWORD=Fullstackform1985&" >> .env
-          echo "MYSQL_ROOT_PASSWORD=Fullstackform1985&" >> .env
-          echo "PORT=8000" >> .env
-          echo "ADMIN_EMAIL=loise.fenoll@ynov.com" >> .env
-          echo "ADMIN_PASSWORD=PvdrTAzTeR247sDnAZBr" >> .env
-          echo "JWT_SECRET_KEY=955aeaac8e7935ebc675c00de118253b84a6143aade62476d40424f25c17d20390e973aeb36aa69472f4e60b497b2e59" >> .env
-          docker compose up -d --build
+          cat > .env << EOF
+          MYSQL_HOST=mysql-fullstackform.alwaysdata.net
+          MYSQL_DATABASE=fullstackform_db
+          MYSQL_USER=419975
+          MYSQL_PASSWORD=Fullstackform1985&
+          MYSQL_ROOT_PASSWORD=Fullstackform1985&
+          PORT=8000
+          ADMIN_EMAIL=loise.fenoll@ynov.com
+          ADMIN_PASSWORD=PvdrTAzTeR247sDnAZBr
+          JWT_SECRET_KEY=955aeaac8e7935ebc675c00de118253b84a6143aade62476d40424f25c17d20390e973aeb36aa69472f4e60b497b2e59
+          EOF
+
+      - name: Start Docker services
+        run: docker compose up -d --build
 
       - name: Wait for services to be ready
         run: |

@@ -1,6 +1,12 @@
 name: Frontend CI/CD Pipeline
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
@@ -55,10 +61,10 @@ jobs:
       mysql:
         image: mysql:8
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testdb
-          MYSQL_USER: testuser
-          MYSQL_PASSWORD: testpass
+          MYSQL_ROOT_PASSWORD: Fullstackform1985&
+          MYSQL_DATABASE: fullstackform_db
+          MYSQL_USER: 419975
+          MYSQL_PASSWORD: Fullstackform1985&
         ports:
           - 3306:3306
         options: >-
@@ -80,18 +86,17 @@ jobs:
         run: npm ci
 
       - name: Start Docker services
-        run: docker compose up -d --build
-        env:
-          MYSQL_HOST: localhost
-          MYSQL_DATABASE: testdb
-          MYSQL_USER: testuser
-          MYSQL_PASSWORD: testpass
-          MYSQL_ROOT_PASSWORD: root
-          PORT: 8000
-          ADMIN_EMAIL: admin@test.com
-          ADMIN_PASSWORD: adminpass
-          JWT_SECRET_KEY: test-secret-key-for-ci
-          ENVIRONMENT: test
+        run: |
+          echo "MYSQL_HOST=mysql-fullstackform.alwaysdata.net" >> .env
+          echo "MYSQL_DATABASE=fullstackform_db" >> .env
+          echo "MYSQL_USER=419975" >> .env
+          echo "MYSQL_PASSWORD=Fullstackform1985&" >> .env
+          echo "MYSQL_ROOT_PASSWORD=Fullstackform1985&" >> .env
+          echo "PORT=8000" >> .env
+          echo "ADMIN_EMAIL=loise.fenoll@ynov.com" >> .env
+          echo "ADMIN_PASSWORD=PvdrTAzTeR247sDnAZBr" >> .env
+          echo "JWT_SECRET_KEY=955aeaac8e7935ebc675c00de118253b84a6143aade62476d40424f25c17d20390e973aeb36aa69472f4e60b497b2e59" >> .env
+          docker compose up -d --build
 
       - name: Wait for services to be ready
         run: |

@@ -122,6 +122,17 @@ jobs:
           
           echo "Testing frontend connectivity:"
           curl -v http://localhost:3000 || echo "Frontend not accessible"
+          
+          echo "Testing specific API endpoints:"
+          echo "Testing /login endpoint:"
+          curl -X POST http://localhost:8000/login -H "Content-Type: application/json" -d '{"email":"test@test.com","password":"test"}' || echo "Login endpoint not working"
+          
+          echo "Testing /users endpoint (should fail without auth):"
+          curl -v http://localhost:8000/users || echo "Users endpoint not accessible"
+          
+          echo "Container network inspection:"
+          docker network ls
+          docker network inspect full-stack-form_app-network || echo "Network not found"
 
       - name: Install dependencies (again for Cypress)
         run: npm ci

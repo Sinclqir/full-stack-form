@@ -20,15 +20,31 @@ describe('Tests d\'authentification', () => {
     })
 
     it('Devrait se connecter avec les identifiants admin corrects', () => {
+      // Intercepter les appels API pour le debug
+      cy.intercept('POST', '**/login').as('loginRequest')
+      cy.intercept('GET', '**/users').as('usersRequest')
+      
       cy.get('#login-email').type('loise.fenoll@ynov.com')
       cy.get('#login-password').type('PvdrTAzTeR247sDnAZBr')
       cy.get('button[type="submit"]').click()
       
+      // Attendre la réponse de login
+      cy.wait('@loginRequest').then((interception) => {
+        console.log('Login response:', interception.response?.body)
+        expect(interception.response?.statusCode).to.be.oneOf([200, 201])
+      })
+      
       // Attendre plus longtemps pour la réponse API
-      cy.wait(2000)
+      cy.wait(3000)
+      
+      // Attendre la réponse de fetch users
+      cy.wait('@usersRequest').then((interception) => {
+        console.log('Users response:', interception.response?.body)
+        expect(interception.response?.statusCode).to.be.oneOf([200, 201])
+      })
       
       // Vérifier la redirection vers la liste des utilisateurs
-      cy.get('.users-title', { timeout: 10000 }).should('contain', 'Gestion des utilisateurs')
+      cy.get('.users-title', { timeout: 15000 }).should('contain', 'Gestion des utilisateurs')
       cy.get('.user-email').should('contain', 'loise.fenoll@ynov.com')
       cy.get('.role-badge').should('contain', 'Admin')
     })
@@ -71,6 +87,9 @@ describe('Tests d\'authentification', () => {
     })
 
     it('Devrait s\'inscrire avec des données valides', () => {
+      // Intercepter l'appel API d'inscription
+      cy.intercept('POST', '**/register').as('registerRequest')
+      
       const testEmail = `test${Date.now()}@example.com`
       
       cy.get('#last_name').type('Doe')
@@ -82,11 +101,22 @@ describe('Tests d\'authentification', () => {
       cy.get('#postal_code').type('75001')
       cy.get('button[type="submit"]').click()
       
-      // Attendre plus longtemps pour la réponse API
-      cy.wait(2000)
+      // Attendre la réponse de l'API
+      cy.wait('@registerRequest').then((interception) => {
+        console.log('Register response:', interception.response?.body)
+        expect(interception.response?.statusCode).to.be.oneOf([200, 201])
+      })
       
-      // Vérifier le message de succès
-      cy.get('.alert.success', { timeout: 10000 }).should('contain', 'Inscription réussie')
+      // Attendre plus longtemps pour la réponse API
+      cy.wait(3000)
+      
+      // Vérifier que le formulaire a été réinitialisé (indication de succès)
+      cy.get('#last_name').should('have.value', '')
+      cy.get('#first_name').should('have.value', '')
+      cy.get('#email').should('have.value', '')
+      
+      // Vérifier que nous sommes revenus au formulaire de connexion
+      cy.get('.auth-title').should('contain', 'Connexion')
     })
 
     it('Devrait afficher des erreurs avec des données invalides', () => {

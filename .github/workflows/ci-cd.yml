@@ -56,8 +56,8 @@ jobs:
           MYSQL_HOST=localhost
           MYSQL_DATABASE=fullstackform_db
           MYSQL_USER=root
-          MYSQL_PASSWORD=Fullstackform1985&
-          MYSQL_ROOT_PASSWORD=Fullstackform1985&
+          MYSQL_PASSWORD="Fullstackform1985&"
+          MYSQL_ROOT_PASSWORD="Fullstackform1985&"
           PORT=8000
           ADMIN_EMAIL=loise.fenoll@ynov.com
           ADMIN_PASSWORD=PvdrTAzTeR247sDnAZBr
@@ -71,7 +71,7 @@ jobs:
       - name: Wait for MySQL to be ready
         run: |
           echo "Waiting for MySQL to be ready..."
-          timeout 120 bash -c 'until docker compose exec -T mysql mysqladmin ping -h localhost -u root -pFullstackform1985& > /dev/null 2>&1; do sleep 5; echo "MySQL not ready yet..."; done'
+          timeout 120 bash -c 'until docker inspect --format="{{json .State.Health.Status}}" $(docker compose ps -q mysql) | grep -q "healthy"; do sleep 5; echo "MySQL not ready yet..."; done'
           echo "MySQL is ready!"
 
       - name: Wait for backend
@@ -93,11 +93,6 @@ jobs:
         if: failure()
         run: docker compose logs mysql
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
       - name: Install dependencies (again for Cypress)
         run: npm ci
 
@@ -107,6 +102,9 @@ jobs:
         run: |
           npx cypress install
           npx cypress run
+
+      - name: Clean up Docker containers
+        run: docker compose down
 
   deploy_vercel:
     runs-on: ubuntu-latest

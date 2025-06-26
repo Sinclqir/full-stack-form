@@ -1,0 +1,49 @@
+describe('Debug - Voir le contenu de la page', () => {
+  it('Devrait afficher le contenu de la page', () => {
+    cy.visit('/')
+    
+    // Attendre que la page se charge
+    cy.wait(2000)
+    
+    // Afficher le contenu du body
+    cy.get('body').then(($body) => {
+      cy.log('Contenu du body:', $body.html())
+    })
+    
+    // Vérifier si React est chargé
+    cy.get('#root').should('exist')
+    
+    // Afficher le contenu du root
+    cy.get('#root').then(($root) => {
+      cy.log('Contenu du root:', $root.html())
+    })
+    
+    // Chercher tous les éléments avec des classes
+    cy.get('*[class]').then(($elements) => {
+      const classes = []
+      $elements.each((i, el) => {
+        const className = el.className
+        if (className && !classes.includes(className)) {
+          classes.push(className)
+        }
+      })
+      cy.log('Classes trouvées:', classes)
+    })
+    
+    // Chercher tous les formulaires
+    cy.get('form').then(($forms) => {
+      cy.log('Nombre de formulaires:', $forms.length)
+      $forms.each((i, form) => {
+        cy.log(`Formulaire ${i}:`, form.outerHTML)
+      })
+    })
+    
+    // Chercher tous les inputs
+    cy.get('input').then(($inputs) => {
+      cy.log('Nombre d\'inputs:', $inputs.length)
+      $inputs.each((i, input) => {
+        cy.log(`Input ${i}:`, input.outerHTML)
+      })
+    })
+  })
+}) 

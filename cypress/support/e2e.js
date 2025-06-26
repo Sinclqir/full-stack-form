@@ -15,3 +15,22 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
+
+// Alternatively you can use CommonJS syntax:
+// require('./commands')
+
+// Ignore Vite WebSocket errors in Cypress
+Cypress.on('uncaught:exception', (err, runnable) => {
+  // Ignore Vite WebSocket errors
+  if (err.message.includes('__WS_TOKEN__') || err.message.includes('@vite/client')) {
+    return false
+  }
+  
+  // Ignore other common development errors
+  if (err.message.includes('ResizeObserver loop limit exceeded')) {
+    return false
+  }
+  
+  // Return true for other errors to fail the test
+  return true
+})

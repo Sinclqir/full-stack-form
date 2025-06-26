@@ -58,6 +58,7 @@ const LoginForm = ({ onLoginSuccess, onSwitchToRegistration }) => {
 
   return (
     <div className="login-form">
+      {error && <div className="alert error">{error}</div>}
       <form onSubmit={handleSubmit} className="login-content">
         <div className="form-group">
           <label htmlFor="login-email" className="form-label">

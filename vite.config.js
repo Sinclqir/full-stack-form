@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Le nom du repo GitHub ici :
-const repoName = 'full-stack-form';
+// Configuration conditionnelle selon l'environnement
+const isProduction = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
-  base: `/${repoName}/`,
+  base: isProduction ? '/' : '/full-stack-form/',
   plugins: [react()],
   server: {
     host: '0.0.0.0',
@@ -15,6 +15,16 @@ export default defineConfig({
     },
     hmr: {
       clientPort: 3000
+    }
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
     }
   }
 })

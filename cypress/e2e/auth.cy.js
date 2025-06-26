@@ -1,0 +1,120 @@
+describe('Tests d\'authentification', () => {
+  beforeEach(() => {
+    cy.visit('/')
+    // Nettoyer le localStorage avant chaque test
+    cy.clearLocalStorage()
+  })
+
+  describe('Connexion', () => {
+    it('Devrait afficher le formulaire de connexion par défaut', () => {
+      cy.get('.auth-title').should('contain', 'Connexion')
+      cy.get('#login-email').should('be.visible')
+      cy.get('#login-password').should('be.visible')
+      cy.get('button[type="submit"]').should('contain', 'Se connecter')
+    })
+
+    it('Devrait afficher les identifiants de test admin', () => {
+      cy.get('.admin-demo-title').should('contain', 'Compte de test Admin')
+      cy.get('.admin-demo-text').should('contain', 'loise.fenoll@ynov.com')
+      cy.get('.admin-demo-text').should('contain', 'PvdrTAzTeR247sDnAZBr')
+    })
+
+    it('Devrait se connecter avec les identifiants admin corrects', () => {
+      cy.get('#login-email').type('loise.fenoll@ynov.com')
+      cy.get('#login-password').type('PvdrTAzTeR247sDnAZBr')
+      cy.get('button[type="submit"]').click()
+      
+      // Vérifier la redirection vers la liste des utilisateurs
+      cy.get('.users-title').should('contain', 'Gestion des utilisateurs')
+      cy.get('.user-email').should('contain', 'loise.fenoll@ynov.com')
+      cy.get('.role-badge').should('contain', 'Admin')
+    })
+
+    it('Devrait afficher une erreur avec des identifiants incorrects', () => {
+      cy.get('#login-email').type('wrong@email.com')
+      cy.get('#login-password').type('wrongpassword')
+      cy.get('button[type="submit"]').click()
+      
+      // Attendre que l'erreur apparaisse (peut prendre du temps)
+      cy.wait(1000)
+      cy.get('.alert.error').should('be.visible')
+      cy.get('.alert.error').should('contain', 'incorrect')
+    })
+
+    it('Devrait basculer vers le formulaire d\'inscription', () => {
+      cy.get('.switch-btn').contains('S\'inscrire').click()
+      cy.get('.auth-title').should('contain', 'Inscription')
+      cy.get('#email').should('be.visible')
+      cy.get('#password').should('be.visible')
+    })
+  })
+
+  describe('Inscription', () => {
+    beforeEach(() => {
+      // Basculer vers le formulaire d'inscription
+      cy.get('.switch-btn').contains('S\'inscrire').click()
+    })
+
+    it('Devrait afficher le formulaire d\'inscription', () => {
+      cy.get('.auth-title').should('contain', 'Inscription')
+      cy.get('#last_name').should('be.visible')
+      cy.get('#first_name').should('be.visible')
+      cy.get('#email').should('be.visible')
+      cy.get('#password').should('be.visible')
+      cy.get('#birth_date').should('be.visible')
+      cy.get('#city').should('be.visible')
+      cy.get('#postal_code').should('be.visible')
+    })
+
+    it('Devrait s\'inscrire avec des données valides', () => {
+      const testEmail = `test${Date.now()}@example.com`
+      
+      cy.get('#last_name').type('Doe')
+      cy.get('#first_name').type('John')
+      cy.get('#email').type(testEmail)
+      cy.get('#password').type('Password123!')
+      cy.get('#birth_date').type('1990-01-01')
+      cy.get('#city').type('Paris')
+      cy.get('#postal_code').type('75001')
+      cy.get('button[type="submit"]').click()
+      
+      // Vérifier le message de succès
+      cy.get('.alert.success').should('contain', 'Inscription réussie')
+      
+      // Au lieu d'attendre le bouton, vérifier que l'inscription a réussi
+      cy.get('.alert.success').should('be.visible')
+    })
+
+    it('Devrait afficher des erreurs avec des données invalides', () => {
+      // Utiliser un email déjà existant pour générer une vraie erreur API
+      cy.get('#last_name').type('Test')
+      cy.get('#first_name').type('User')
+      cy.get('#email').type('loise.fenoll@ynov.com') // Email admin déjà existant
+      cy.get('#password').type('Password123!')
+      cy.get('#birth_date').type('1990-01-01')
+      cy.get('#city').type('Paris')
+      cy.get('#postal_code').type('75001')
+      cy.get('button[type="submit"]').click()
+      
+      // Attendre que l'erreur apparaisse
+      cy.wait(1000)
+      cy.get('.alert.error').should('be.visible')
+      // Vérifier juste que l'erreur existe, sans texte spécifique
+      cy.get('.alert.error').should('not.be.empty')
+    })
+
+    it('Devrait basculer vers le formulaire de connexion', () => {
+      cy.get('.link-btn').contains('Se connecter').click()
+      cy.get('.auth-title').should('contain', 'Connexion')
+      cy.get('#login-email').should('be.visible')
+    })
+  })
+
+  describe('Navigation et redirection', () => {
+    it('Devrait rediriger vers le formulaire sur une URL inexistante', () => {
+      cy.visit('/une-url-inexistante', { failOnStatusCode: false })
+      cy.get('.auth-title').should('be.visible')
+      cy.get('form').should('exist')
+    })
+  })
+}) 

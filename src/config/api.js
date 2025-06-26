@@ -18,8 +18,8 @@ function getApiUrl() {
 export const API_URL = getApiUrl();
 
 export const API_ENDPOINTS = {
-  REGISTER: `${API_URL}/api/register`,
-  LOGIN: `${API_URL}/api/login`,
-  USERS: `${API_URL}/api/users`,
-  PUBLIC_USERS: `${API_URL}/api/public-users`,
+  REGISTER: `${API_URL}/register`,
+  LOGIN: `${API_URL}/login`,
+  USERS: `${API_URL}/users`,
+  PUBLIC_USERS: `${API_URL}/public-users`,
 };

@@ -57,22 +57,6 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_ROOT_PASSWORD: Fullstackform1985&
-          MYSQL_DATABASE: fullstackform_db
-          MYSQL_USER: 419975
-          MYSQL_PASSWORD: Fullstackform1985&
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
     steps:
       - uses: actions/checkout@v4
 

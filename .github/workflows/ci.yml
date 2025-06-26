@@ -58,15 +58,16 @@ jobs:
           MYSQL_PASSWORD: testpass
           JWT_SECRET_KEY: test-secret-key
 
-      - name: Upload coverage to Codecov (if token available)
-        uses: codecov/codecov-action@v4
-        with:
-          files: |
-            ./coverage/lcov.info
-            ./server/coverage.xml
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
-        continue-on-error: true
+      # Temporairement désactivé en attendant le token Codecov
+      # - name: Upload coverage to Codecov (if token available)
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     files: |
+      #       ./coverage/lcov.info
+      #       ./server/coverage.xml
+      #     fail_ci_if_error: false
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #   continue-on-error: true
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
@@ -76,6 +77,24 @@ jobs:
             ./coverage/
             ./server/htmlcov/
           retention-days: 30
+
+      - name: Display coverage summary
+        run: |
+          echo "=== Frontend Coverage ==="
+          if [ -f "./coverage/lcov.info" ]; then
+            echo "Frontend coverage report generated"
+            cat ./coverage/lcov.info | grep -E "^SF:|^LF:|^LH:" | head -10
+          else
+            echo "No frontend coverage file found"
+          fi
+          
+          echo "=== Backend Coverage ==="
+          if [ -f "./server/coverage.xml" ]; then
+            echo "Backend coverage report generated"
+            grep -o 'coverage.*line-rate="[^"]*"' ./server/coverage.xml || echo "No coverage data found"
+          else
+            echo "No backend coverage file found"
+          fi
 
   integration:
     needs: test

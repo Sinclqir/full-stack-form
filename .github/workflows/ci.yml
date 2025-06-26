@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Frontend CI/CD Pipeline
 
 on: [push, pull_request]
 
@@ -21,6 +21,15 @@ jobs:
       - name: Run unit tests with coverage
         run: npm test -- --coverage --watchAll=false
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+        env:
+          CODECOV_DEBUG: true
+
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -33,7 +42,7 @@ jobs:
           echo "=== Frontend Coverage ==="
           if [ -f "./coverage/lcov.info" ]; then
             echo "Frontend coverage report generated"
-            cat ./coverage/lcov.info | grep -E "^SF:|^LF:|^LH:" | head -10
+            head -20 ./coverage/lcov.info
           else
             echo "No frontend coverage file found"
           fi

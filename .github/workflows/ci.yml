@@ -50,7 +50,7 @@ jobs:
       - name: Run backend tests
         run: |
           cd server
-          python -m pytest tests/ -v --cov=. --cov-report=xml
+          python -m pytest tests/ -v --cov=. --cov-report=xml --cov-report=html
         env:
           MYSQL_HOST: localhost
           MYSQL_DATABASE: testdb
@@ -58,13 +58,24 @@ jobs:
           MYSQL_PASSWORD: testpass
           JWT_SECRET_KEY: test-secret-key
 
-      - name: Upload coverage to Codecov
+      - name: Upload coverage to Codecov (if token available)
         uses: codecov/codecov-action@v3
         with:
           files: |
             ./coverage/lcov.info
             ./server/coverage.xml
-          fail_ci_if_error: true
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+        continue-on-error: true
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-reports
+          path: |
+            ./coverage/
+            ./server/htmlcov/
+          retention-days: 30
 
   integration:
     needs: test

@@ -76,7 +76,7 @@ services:
       - VITE_BASE_PATH=/
       - CHOKIDAR_USEPOLLING=true
     depends_on:
-      server
+      - server
     networks:
       - app-network
     volumes:

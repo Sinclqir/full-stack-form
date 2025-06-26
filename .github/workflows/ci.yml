@@ -81,6 +81,17 @@ jobs:
 
       - name: Start Docker services
         run: docker compose up -d --build
+        env:
+          MYSQL_HOST: localhost
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
+          MYSQL_ROOT_PASSWORD: root
+          PORT: 8000
+          ADMIN_EMAIL: admin@test.com
+          ADMIN_PASSWORD: adminpass
+          JWT_SECRET_KEY: test-secret-key-for-ci
+          ENVIRONMENT: test
 
       - name: Wait for services to be ready
         run: |

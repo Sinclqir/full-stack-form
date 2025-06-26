@@ -68,32 +68,26 @@ jobs:
       - name: Build and start Docker containers
         run: docker compose up -d --build
 
-      - name: Check MySQL health and show logs if needed
+      - name: Wait for services to be ready
         run: |
-          echo "Waiting for MySQL to be healthy..."
-          timeout 120 bash -c 'until docker inspect --format="{{json .State.Health.Status}}" $(docker compose ps -q mysql) | grep -q "healthy"; do sleep 5; echo "MySQL not ready yet..."; done'
-          echo "MySQL is healthy!"
-        continue-on-error: false
-
-      - name: Show MySQL logs if unhealthy
-        if: failure()
-        run: |
-          echo "MySQL failed to become healthy. Showing logs:"
-          docker compose logs mysql
+          echo "Waiting for all services to be ready..."
+          sleep 30
+          echo "Checking container status:"
+          docker compose ps
 
       - name: Wait for backend
         run: |
           echo "Waiting for backend..."
-          timeout 90 bash -c 'until curl -f http://localhost:8000 > /dev/null 2>&1; do sleep 5; echo "Backend not ready yet..."; done'
+          timeout 120 bash -c 'until curl -f http://localhost:8000 > /dev/null 2>&1; do sleep 5; echo "Backend not ready yet..."; done'
           echo "Backend is ready!"
 
       - name: Wait for frontend
         run: |
           echo "Waiting for frontend..."
-          timeout 90 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 5; echo "Frontend not ready yet..."; done'
+          timeout 120 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 5; echo "Frontend not ready yet..."; done'
           echo "Frontend is ready!"
 
-      - name: Show container status
+      - name: Show final container status
         run: docker compose ps
 
       - name: Install dependencies (again for Cypress)

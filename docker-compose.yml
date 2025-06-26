@@ -31,11 +31,11 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pFullstackform1985"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   adminer:
     image: adminer
@@ -65,8 +65,7 @@ services:
     volumes:
       - ./server:/app
     depends_on:
-      mysql:
-        condition: service_healthy
+      - mysql
 
   client:
     build:

@@ -80,7 +80,7 @@ jobs:
         run: npm ci
 
       - name: Start Docker services
-        run: docker-compose up -d --build
+        run: docker compose up -d --build
 
       - name: Wait for services to be ready
         run: |

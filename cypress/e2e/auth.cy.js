@@ -30,7 +30,14 @@ describe('Tests d\'authentification', () => {
       
       // Attendre la réponse de login
       cy.wait('@loginRequest').then((interception) => {
-        console.log('Login response:', interception.response?.body)
+        console.log('Login response status:', interception.response?.statusCode)
+        console.log('Login response body:', interception.response?.body)
+        console.log('Login request body:', interception.request?.body)
+        
+        if (interception.response?.statusCode === 500) {
+          console.error('Login failed with 500 error:', interception.response?.body)
+        }
+        
         expect(interception.response?.statusCode).to.be.oneOf([200, 201])
       })
       
@@ -39,7 +46,13 @@ describe('Tests d\'authentification', () => {
       
       // Attendre la réponse de fetch users
       cy.wait('@usersRequest').then((interception) => {
-        console.log('Users response:', interception.response?.body)
+        console.log('Users response status:', interception.response?.statusCode)
+        console.log('Users response body:', interception.response?.body)
+        
+        if (interception.response?.statusCode === 500) {
+          console.error('Users fetch failed with 500 error:', interception.response?.body)
+        }
+        
         expect(interception.response?.statusCode).to.be.oneOf([200, 201])
       })
       
@@ -118,7 +131,14 @@ describe('Tests d\'authentification', () => {
       
       // Attendre la réponse de l'API
       cy.wait('@registerRequest').then((interception) => {
-        console.log('Register response:', interception.response?.body)
+        console.log('Register response status:', interception.response?.statusCode)
+        console.log('Register response body:', interception.response?.body)
+        console.log('Register request body:', interception.request?.body)
+        
+        if (interception.response?.statusCode === 500) {
+          console.error('Registration failed with 500 error:', interception.response?.body)
+        }
+        
         expect(interception.response?.statusCode).to.be.oneOf([200, 201])
       })
       

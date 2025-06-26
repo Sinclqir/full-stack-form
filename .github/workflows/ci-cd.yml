@@ -139,20 +139,23 @@ jobs:
 
       - name: Run Cypress E2E tests (Basic Infrastructure)
         env:
-          CYPRESS_BASE_URL: http://localhost:3000
+          CYPRESS_BASE_URL: http://localhost:3000/full-stack-form
+          VITE_API_URL: http://localhost:8000
         run: |
           npx cypress install
           npx cypress run --spec "cypress/e2e/basic.cy.js"
 
       - name: Run Cypress E2E tests (Authentication)
         env:
-          CYPRESS_BASE_URL: http://localhost:3000
+          CYPRESS_BASE_URL: http://localhost:3000/full-stack-form
+          VITE_API_URL: http://localhost:8000
         run: |
           npx cypress run --spec "cypress/e2e/auth.cy.js"
 
       - name: Run Cypress E2E tests (User Management)
         env:
-          CYPRESS_BASE_URL: http://localhost:3000
+          CYPRESS_BASE_URL: http://localhost:3000/full-stack-form
+          VITE_API_URL: http://localhost:8000
         run: |
           npx cypress run --spec "cypress/e2e/users.cy.js"
 

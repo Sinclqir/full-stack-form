@@ -50,16 +50,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Clean up previous containers and volumes
-        run: |
-          echo "=== CLEANING UP PREVIOUS CONTAINERS ==="
-          docker compose down -v || echo "No previous containers to clean"
-          docker system prune -f || echo "No unused resources to clean"
-
       - name: Create .env file for Docker tests
         run: |
           cat > .env << EOF
-          MYSQL_HOST=mysql
+          MYSQL_HOST=localhost
           MYSQL_DATABASE=fullstackform_db
           MYSQL_USER=root
           MYSQL_PASSWORD=Fullstackform1985
@@ -72,74 +66,7 @@ jobs:
           EOF
 
       - name: Build and start Docker containers
-        run: |
-          # Start MySQL first and wait for it to be ready
-          docker compose up -d mysql
-          echo "MySQL container started, checking logs..."
-          
-          # Show MySQL logs during startup
-          timeout 180 bash -c '
-            while ! docker exec mysql_db mysql -u root -pFullstackform1985 -e "SELECT 1;" > /dev/null 2>&1; do
-              echo "MySQL not ready yet... ($(date))"
-              echo "Recent MySQL logs:"
-              docker compose logs --tail=10 mysql
-              sleep 10
-            done
-          '
-          echo "MySQL is ready!"
-          
-          # Start the backend after MySQL is ready
-          docker compose up -d server
-          
-          # Start the frontend with the correct API URL for host access
-          VITE_API_URL=http://localhost:8000 docker compose up -d client
-
-      - name: Debug MySQL startup issues
-        run: |
-          echo "=== DEBUGGING MYSQL STARTUP ==="
-          echo "Container status:"
-          docker compose ps
-          
-          echo "MySQL container logs:"
-          docker compose logs mysql
-          
-          echo "Testing MySQL connection with different methods:"
-          echo "Method 1 - Direct exec:"
-          docker exec mysql_db mysql -u root -pFullstackform1985 -e "SELECT 1;" || echo "Method 1 failed"
-          
-          echo "Method 2 - Check if MySQL process is running:"
-          docker exec mysql_db ps aux | grep mysql || echo "No MySQL process found"
-          
-          echo "Method 3 - Check MySQL port:"
-          docker exec mysql_db netstat -tlnp | grep 3306 || echo "Port 3306 not listening"
-          
-          echo "Method 4 - Check MySQL error log:"
-          docker exec mysql_db cat /var/log/mysql/error.log 2>/dev/null || echo "No error log found"
-
-      - name: Test MySQL with simpler configuration
-        run: |
-          echo "=== TESTING MYSQL WITH SIMPLER CONFIG ==="
-          echo "Stopping current MySQL container:"
-          docker compose stop mysql
-          
-          echo "Starting MySQL with simpler password:"
-          docker run -d --name mysql_test \
-            -e MYSQL_ROOT_PASSWORD=root \
-            -e MYSQL_DATABASE=test_db \
-            -p 3307:3306 \
-            mysql:8.0 --default-authentication-plugin=mysql_native_password
-          
-          echo "Waiting for test MySQL to be ready..."
-          timeout 60 bash -c 'until docker exec mysql_test mysql -u root -proot -e "SELECT 1;" > /dev/null 2>&1; do sleep 5; echo "Test MySQL not ready yet..."; done'
-          
-          if [ $? -eq 0 ]; then
-            echo "Test MySQL started successfully!"
-            docker stop mysql_test
-            docker rm mysql_test
-          else
-            echo "Test MySQL also failed to start"
-            docker logs mysql_test
-          fi
+        run: docker compose up -d --build
 
       - name: Wait for services to be ready
         run: |
@@ -164,82 +91,6 @@ jobs:
           timeout 120 bash -c 'until curl -f http://localhost:8000 > /dev/null 2>&1; do sleep 5; echo "Backend not ready yet..."; done'
           echo "Backend is ready!"
 
-      - name: Check database and admin user
-        run: |
-          echo "=== CHECKING DATABASE STATE ==="
-          echo "Testing database connection:"
-          docker exec mysql_db mysql -u root -pFullstackform1985 -e "USE fullstackform_db; SHOW TABLES;" || echo "Database connection failed"
-          
-          echo "Checking if admin user exists:"
-          docker exec mysql_db mysql -u root -pFullstackform1985 -e "USE fullstackform_db; SELECT id, email, role FROM users WHERE email='loise.fenoll@ynov.com';" || echo "Admin user check failed"
-          
-          echo "Listing all users:"
-          docker exec mysql_db mysql -u root -pFullstackform1985 -e "USE fullstackform_db; SELECT id, email, role, created_at FROM users;" || echo "Users listing failed"
-
-      - name: Verify database connectivity before restart
-        run: |
-          echo "=== VERIFYING DATABASE CONNECTIVITY ==="
-          echo "Testing MySQL connection from host:"
-          docker exec mysql_db mysql -u root -pFullstackform1985 -e "SELECT 1;" || echo "MySQL connection failed"
-          
-          echo "Testing MySQL connection from backend container:"
-          docker exec fastapi_backend python -c "import mysql.connector; print('MySQL connector available')" || echo "MySQL connector not available in backend"
-
-      - name: Ensure MySQL is fully ready
-        run: |
-          echo "=== ENSURING MYSQL IS FULLY READY ==="
-          echo "Waiting for MySQL to be completely ready..."
-          timeout 60 bash -c '
-            while ! docker exec mysql_db mysql -u root -pFullstackform1985 -e "SELECT 1;" > /dev/null 2>&1; do
-              echo "MySQL not ready yet... ($(date))"
-              sleep 5
-            done
-          '
-          echo "MySQL is fully ready!"
-          
-          echo "Testing database schema:"
-          docker exec mysql_db mysql -u root -pFullstackform1985 -e "USE fullstackform_db; SHOW TABLES;" || echo "Database schema not ready"
-
-      - name: Restart backend to ensure proper initialization
-        run: |
-          echo "=== RESTARTING BACKEND ==="
-          echo "Stopping backend container..."
-          docker compose stop server
-          
-          echo "Starting backend container..."
-          docker compose up -d server
-          
-          echo "Waiting for backend to be ready after restart..."
-          echo "Checking logs during startup..."
-          timeout 120 bash -c '
-            while ! curl -f http://localhost:8000/health > /dev/null 2>&1; do
-              echo "Backend not ready yet... ($(date))"
-              echo "Recent logs:"
-              docker compose logs --tail=10 server
-              sleep 10
-            done
-          '
-          echo "Backend is ready after restart!"
-
-      - name: Debug backend restart issues
-        run: |
-          echo "=== DEBUGGING BACKEND RESTART ==="
-          echo "Container status after restart:"
-          docker compose ps
-          
-          echo "Backend container logs after restart:"
-          docker compose logs --tail=50 server
-          
-          echo "Testing if backend is responding:"
-          curl -v http://localhost:8000/health || echo "Health endpoint not responding"
-          curl -v http://localhost:8000/ || echo "Root endpoint not responding"
-          
-          echo "Checking if port 8000 is listening:"
-          netstat -tlnp | grep :8000 || echo "Port 8000 not listening"
-          
-          echo "Checking backend container processes:"
-          docker exec fastapi_backend ps aux || echo "Cannot check processes"
-
       - name: Wait for frontend
         run: |
           echo "Waiting for frontend..."
@@ -260,15 +111,6 @@ jobs:
           docker compose logs client
           echo "Backend container logs:"
           docker compose logs server
-
-      - name: Show backend logs for debugging
-        run: |
-          echo "=== BACKEND LOGS ==="
-          docker compose logs server
-          echo "=== MYSQL LOGS ==="
-          docker compose logs mysql
-          echo "=== CONTAINER STATUS ==="
-          docker compose ps
 
       - name: Test API connectivity
         run: |
@@ -292,45 +134,27 @@ jobs:
           docker network ls
           docker network inspect full-stack-form_app-network || echo "Network not found"
 
-      - name: Test API endpoints directly
-        run: |
-          echo "=== TESTING LOGIN ENDPOINT ==="
-          curl -X POST http://localhost:8000/login \
-            -H "Content-Type: application/json" \
-            -d '{"email":"loise.fenoll@ynov.com","password":"PvdrTAzTeR247sDnAZBr"}' \
-            -v || echo "Login test failed"
-          
-          echo "=== TESTING REGISTER ENDPOINT ==="
-          curl -X POST http://localhost:8000/register \
-            -H "Content-Type: application/json" \
-            -d '{"last_name":"Test","first_name":"User","email":"test@example.com","password":"Password123!","birth_date":"1990-01-01","city":"Paris","postal_code":"75001","role":"user"}' \
-            -v || echo "Register test failed"
-          
-          echo "=== TESTING HEALTH ENDPOINT ==="
-          curl -v http://localhost:8000/health || echo "Health endpoint failed"
-
       - name: Install dependencies (again for Cypress)
         run: npm ci
 
       - name: Run Cypress E2E tests (Basic Infrastructure)
         env:
-          CYPRESS_BASE_URL: http://localhost:3000
+          CYPRESS_BASE_URL: http://localhost:3000/full-stack-form
           VITE_API_URL: http://localhost:8000
         run: |
           npx cypress install
           npx cypress run --spec "cypress/e2e/basic.cy.js"
 
       - name: Run Cypress E2E tests (Authentication)
-        continue-on-error: true
         env:
-          CYPRESS_BASE_URL: http://localhost:3000
+          CYPRESS_BASE_URL: http://localhost:3000/full-stack-form
           VITE_API_URL: http://localhost:8000
         run: |
           npx cypress run --spec "cypress/e2e/auth.cy.js"
 
       - name: Run Cypress E2E tests (User Management)
         env:
-          CYPRESS_BASE_URL: http://localhost:3000
+          CYPRESS_BASE_URL: http://localhost:3000/full-stack-form
           VITE_API_URL: http://localhost:8000
         run: |
           npx cypress run --spec "cypress/e2e/users.cy.js"

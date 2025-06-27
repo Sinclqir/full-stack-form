@@ -34,7 +34,7 @@ describe('Tests de gestion des utilisateurs', () => {
       cy.get('button[type="submit"]').click()
       
       // Attendre le message de succès
-      cy.get('.alert.success').should('contain', 'Inscription réussie')
+      cy.get('.alert.success', { timeout: 10000 }).should('contain', 'Inscription réussie')
       
       // Recharger la page pour revenir au formulaire de connexion
       cy.reload()
@@ -43,6 +43,9 @@ describe('Tests de gestion des utilisateurs', () => {
       cy.get('#login-email').type(testEmail)
       cy.get('#login-password').type('Password123!')
       cy.get('button[type="submit"]').click()
+      
+      // Attendre que la liste des utilisateurs se charge
+      cy.get('.users-title', { timeout: 10000 }).should('contain', 'Gestion des utilisateurs')
     })
 
     it('Devrait voir la liste des utilisateurs en tant qu\'utilisateur normal', () => {
@@ -68,6 +71,9 @@ describe('Tests de gestion des utilisateurs', () => {
       cy.get('#login-email').type('loise.fenoll@ynov.com')
       cy.get('#login-password').type('PvdrTAzTeR247sDnAZBr')
       cy.get('button[type="submit"]').click()
+      
+      // Attendre que la liste des utilisateurs se charge
+      cy.get('.users-title', { timeout: 10000 }).should('contain', 'Gestion des utilisateurs')
     })
 
     it('Devrait voir la liste complète des utilisateurs en tant qu\'admin', () => {
@@ -128,7 +134,7 @@ describe('Tests de gestion des utilisateurs', () => {
       cy.get('button[type="submit"]').click()
       
       // Vérifier que la liste des utilisateurs se charge correctement
-      cy.get('.users-title').should('contain', 'Gestion des utilisateurs')
+      cy.get('.users-title', { timeout: 10000 }).should('contain', 'Gestion des utilisateurs')
       cy.get('.user-card').should('exist')
       
       // Vérifier que le bouton de retry existe (en cas d'erreur future)

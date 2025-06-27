@@ -12,6 +12,12 @@ function getApiUrl() {
   if (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) {
     return process.env.VITE_API_URL;
   }
+  
+  // URL par défaut pour la production (Vercel)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    return 'https://full-stack-form-server.vercel.app';
+  }
+  
   return 'http://localhost:8000';
 }
 

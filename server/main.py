@@ -38,6 +38,7 @@ app.add_middleware(
         "https://*.github.io",  # Tous les sous-domaines GitHub Pages
         "https://full-stack-form-server.vercel.app",
         "https://*.vercel.app",  # Tous les sous-domaines Vercel
+        "https://sinclqirs-projects.vercel.app",  # URL spécifique de votre équipe
         "*"  # Temporaire pour debug - à retirer en production
     ],
     allow_credentials=True,
@@ -51,7 +52,10 @@ app.add_middleware(
         "X-Requested-With",
         "Origin",
         "Access-Control-Request-Method",
-        "Access-Control-Request-Headers"
+        "Access-Control-Request-Headers",
+        "Access-Control-Allow-Origin",
+        "Access-Control-Allow-Methods",
+        "Access-Control-Allow-Headers"
     ],
     expose_headers=["*"],
     max_age=86400,  # Cache preflight pour 24h
@@ -287,23 +291,42 @@ async def cors_test():
     """Route de test pour vérifier la configuration CORS"""
     return {
         "message": "CORS test successful",
-        "timestamp": datetime.utcnow().isoformat(),
         "allowed_origins": [
             "http://localhost:3000",
-            "http://localhost:5173",
+            "http://localhost:5173", 
             "http://localhost:4173",
             "https://sinclqir.github.io",
             "https://*.github.io",
             "https://full-stack-form-server.vercel.app",
-            "https://*.vercel.app"
-        ]
+            "https://*.vercel.app",
+            "https://sinclqirs-projects.vercel.app"
+        ],
+        "timestamp": datetime.utcnow().isoformat()
     }
 
-# Route OPTIONS pour gérer les requêtes preflight
+@app.options("/cors-test")
+async def cors_test_options():
+    """Handler OPTIONS pour le test CORS"""
+    return {"message": "CORS preflight successful"}
+
 @app.options("/{full_path:path}")
 async def options_handler(full_path: str):
-    """Gère les requêtes OPTIONS pour CORS"""
-    return {"message": "OK"}
+    """Handler générique pour toutes les requêtes OPTIONS"""
+    return {
+        "message": f"OPTIONS request handled for {full_path}",
+        "allowed_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allowed_headers": [
+            "Accept",
+            "Accept-Language", 
+            "Content-Language",
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers"
+        ]
+    }
 
 if __name__ == "__main__":
     import uvicorn

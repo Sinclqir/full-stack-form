@@ -91,8 +91,12 @@ describe('Tests de gestion des utilisateurs', () => {
             
             // Attendre que la liste des utilisateurs se charge
             cy.get('.users-title', { timeout: 10000 }).should('contain', 'Gestion des utilisateurs')
-          } else {
+          } else if ($body.find('.alert.error').length > 0) {
             cy.log('Backend not available, skipping user creation test')
+            // Don't fail the test, just skip it
+            cy.get('.alert.error').should('exist')
+          } else {
+            cy.log('No response from backend, skipping user creation test')
           }
         })
       })
@@ -145,6 +149,9 @@ describe('Tests de gestion des utilisateurs', () => {
             cy.get('.users-title').should('contain', 'Gestion des utilisateurs')
           } else if ($body.find('.alert.error').length > 0) {
             cy.log('Backend not available, skipping admin login test')
+            cy.get('.alert.error').should('exist')
+          } else {
+            cy.log('No response from backend, skipping admin login test')
           }
         })
       })
@@ -261,7 +268,7 @@ describe('Tests de gestion des utilisateurs', () => {
             cy.log('Backend not available, but error handling is working')
             cy.get('.alert.error').should('exist')
           } else {
-            cy.log('Backend not available, skipping this test')
+            cy.log('No response from backend, skipping this test')
           }
         })
       })

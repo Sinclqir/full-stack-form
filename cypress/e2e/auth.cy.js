@@ -1,7 +1,6 @@
 describe('Tests d\'authentification', () => {
   beforeEach(() => {
     cy.visit('/')
-    // Nettoyer le localStorage avant chaque test
     cy.clearLocalStorage()
   })
 
@@ -24,10 +23,8 @@ describe('Tests d\'authentification', () => {
       cy.get('#login-password').type('wrongpassword')
       cy.get('button[type="submit"]').click()
       
-      // Attendre que l'erreur apparaisse (peut prendre du temps)
       cy.wait(2000)
       cy.get('.alert.error', { timeout: 10000 }).should('be.visible')
-      // Vérifier juste que l'erreur existe, sans texte spécifique
       cy.get('.alert.error').should('not.be.empty')
     })
 
@@ -41,17 +38,13 @@ describe('Tests d\'authentification', () => {
 
   describe('Inscription', () => {
     beforeEach(() => {
-      // Ensure we start from the login form
       cy.visit('/')
       cy.clearLocalStorage()
       
-      // Wait for the page to load
       cy.get('.auth-title').should('be.visible')
       
-      // Basculer vers le formulaire d'inscription avec plus de temps d'attente
       cy.get('.switch-btn', { timeout: 10000 }).contains('S\'inscrire').should('be.visible').click()
       
-      // Attendre que le formulaire d'inscription soit visible
       cy.get('.auth-title', { timeout: 10000 }).should('contain', 'Inscription')
       cy.get('#last_name', { timeout: 10000 }).should('be.visible')
     })
@@ -68,17 +61,15 @@ describe('Tests d\'authentification', () => {
     })
 
     it('Devrait afficher des erreurs avec des données invalides', () => {
-      // Utiliser un email déjà existant pour générer une vraie erreur API
       cy.get('#last_name').type('Test')
       cy.get('#first_name').type('User')
-      cy.get('#email').type('loise.fenoll@ynov.com') // Email admin déjà existant
+      cy.get('#email').type('loise.fenoll@ynov.com')
       cy.get('#password').type('Password123!')
       cy.get('#birth_date').type('1990-01-01')
       cy.get('#city').type('Paris')
       cy.get('#postal_code').type('75001')
       cy.get('button[type="submit"]').click()
       
-      // Attendre que l'erreur apparaisse
       cy.wait(2000)
       cy.get('.alert.error', { timeout: 10000 }).should('be.visible')
       // Vérifier juste que l'erreur existe, sans texte spécifique

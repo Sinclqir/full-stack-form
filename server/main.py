@@ -31,15 +31,24 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        # Développement local
         "http://localhost:3000",
         "http://localhost:5173",
         "http://localhost:4173",
+        
+        # GitHub Pages - votre domaine spécifique
         "https://sinclqir.github.io",
-        "https://*.github.io",  # Tous les sous-domaines GitHub Pages
+        "https://sinclqir.github.io/full-stack-form",
+        
+        # GitHub Pages - tous les sous-domaines (fallback)
+        "https://*.github.io",
+        
+        # Vercel - backend
         "https://full-stack-form-server.vercel.app",
-        "https://*.vercel.app",  # Tous les sous-domaines Vercel
-        "https://sinclqirs-projects.vercel.app",  # URL spécifique de votre équipe
-        "*"  # Temporaire pour debug - à retirer en production
+        "https://sinclqirs-projects.vercel.app",
+        
+        # Vercel - tous les sous-domaines (fallback)
+        "https://*.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
